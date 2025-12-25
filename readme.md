@@ -201,8 +201,8 @@ npm install
 
 ```env
 PORT=4000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/book_audit
-JWT_SECRET=supersecret
+MONGO_URI=mongodb://<your host add>/book_audits
+JWT_SECRET=<jwt secret key>
 ```
 
 > Ensure IP is whitelisted in MongoDB Atlas.
