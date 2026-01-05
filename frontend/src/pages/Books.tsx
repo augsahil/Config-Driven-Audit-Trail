@@ -16,6 +16,7 @@ interface Book {
 const Books = () => {
   const [books, setBooks] = useState<Book[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingBook, setEditingBook] = useState<Book | null>(null)
   const [formData, setFormData] = useState({
@@ -29,12 +30,25 @@ const Books = () => {
     fetchBooks()
   }, [])
 
-  const fetchBooks = async () => {
+  const fetchBooks = async (cursor?: string) => {
     try {
-      const response = await axios.get('/api/books')
-      setBooks(response.data)
+      const url = cursor ? `/api/books?limit=10&cursor=${cursor}` : '/api/books?limit=10'
+      const response = await axios.get(url)
+      const data = response.data || {}
+      let items = []
+      let nextCursor = null
+      if (Array.isArray(data)) {
+        items = data
+      } else {
+        items = data.items || []
+        nextCursor = data.nextCursor || null
+      }
+      setBooks(prev => cursor ? [...prev, ...items] : items)
+      setNextCursor(nextCursor)
     } catch (error) {
       console.error('Error fetching books:', error)
+      setBooks([])
+      setNextCursor(null)
     } finally {
       setIsLoading(false)
     }

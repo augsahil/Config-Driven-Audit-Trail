@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import User from '../models/user.model'
+import { asyncStore } from './request-context.middleware'
 
 export interface AuthRequest extends Request {
   user?: any
@@ -23,5 +24,9 @@ export const authMiddleware = async (
   }
 
   req.user = user
+  const store = asyncStore.getStore()
+  if (store) {
+    store.set('userId', user.id)
+  }
   next()
 }

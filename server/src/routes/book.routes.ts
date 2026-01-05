@@ -1,13 +1,24 @@
 import { Router } from 'express'
 import { authMiddleware as auth } from '../middleware/auth.middleware'
-import { createBook, updateBook } from '../services/book.service'
+import { createBook, updateBook, deleteBook } from '../services/book.service'
 import { Book } from '../models/book.model'
 
 const router = Router()
 
-router.get('/', async (_req, res) => {
-  const books = await Book.find()
-  res.json(books)
+router.get('/', async (req, res) => {
+  const limit = Number(req.query.limit) || 10
+  const cursor = req.query.cursor as string
+  const query = cursor ? { _id: { $gt: cursor } } : {}
+  const books = await Book.find(query).limit(limit + 1)
+  const hasNext = books.length > limit
+  const items = hasNext ? books.slice(0, -1) : books
+  const nextCursor = hasNext ? items[items.length - 1]._id : null
+  res.json({ items, nextCursor })
+})
+
+router.get('/:id', async (req, res) => {
+  const book = await Book.findById(req.params.id)
+  res.json(book)
 })
 
 router.post('/', auth, async (req: any, res) => {
@@ -20,8 +31,8 @@ router.patch('/:id', auth, async (req: any, res) => {
   res.json(book)
 })
 
-router.delete('/:id', auth, async (req, res) => {
-  await Book.findByIdAndDelete(req.params.id)
+router.delete('/:id', auth, async (req: any, res) => {
+  await deleteBook(req.params.id, req.user.id)
   res.json({ ok: true })
 })
 

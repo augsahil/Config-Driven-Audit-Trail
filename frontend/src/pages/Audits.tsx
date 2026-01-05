@@ -24,34 +24,27 @@ const Audits = () => {
   const fetchAudits = async () => {
     try {
       const response = await axios.get(`/api/audits?limit=${limit}`)
-      setAudits(response.data)
+      const data = response.data || {}
+      const items = data.items || []
+      setAudits(items)
     } catch (error) {
       console.error('Error fetching audits:', error)
+      setAudits([])
     } finally {
       setIsLoading(false)
     }
   }
 
   const renderDiff = (diff: any) => {
-    if (!diff) return null
+    if (!diff || !diff.changedFields) return null
 
     return (
       <div className="text-xs">
-        {diff.added && (
-          <div className="text-green-600">
-            <strong>Added:</strong> {JSON.stringify(diff.added, null, 2)}
+        {diff.changedFields.map((field: string) => (
+          <div key={field} className="text-blue-600">
+            <strong>{field}:</strong> {diff[field]?.before || 'null'} → {diff[field]?.after || 'null'}
           </div>
-        )}
-        {diff.removed && (
-          <div className="text-red-600">
-            <strong>Removed:</strong> {JSON.stringify(diff.removed, null, 2)}
-          </div>
-        )}
-        {diff.changed && (
-          <div className="text-blue-600">
-            <strong>Changed:</strong> {JSON.stringify(diff.changed, null, 2)}
-          </div>
-        )}
+        ))}
       </div>
     )
   }

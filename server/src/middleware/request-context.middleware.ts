@@ -10,6 +10,8 @@ export const requestContext = (
   next: NextFunction
 ) => {
   const store = new Map()
-  store.set('requestId', randomUUID())
+  const requestId = randomUUID()
+  store.set('requestId', requestId)
+  ;(req as any).requestId = requestId
   asyncStore.run(store, next)
 }

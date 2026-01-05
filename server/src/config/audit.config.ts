@@ -6,7 +6,7 @@ export const auditConfig = {
   },
   User: {
     track: true,
-    exclude: ['credentials'],
-    redact: ['credentials'],
+    exclude: ['apiKey'],
+    redact: ['apiKey'],
   },
 } as const
